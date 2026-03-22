@@ -9,7 +9,7 @@ description: >
   사용자가 특정 선택지의 장단점, 최신 동향, 후보 비교, 추천 근거를 요구하는 경우에도 사용한다.
   단순 의견 제시나 가벼운 잡담이 아니라, 실제 정보 수집과 근거 기반 판단이 필요한 경우에 사용한다.
   구조화된 리서치 보고서를 작성하고 Obsidian 호환 마크다운으로 저장한다.
-allowed-tools: WebSearch, WebFetch, Read, Write, Bash, Glob
+allowed-tools: WebSearch, WebFetch, Read, Write, Bash, Glob, mcp__brave-search__brave_web_search, mcp__brave-search__brave_news_search, mcp__tavily__tavily-search, mcp__tavily__tavily-extract
 ---
 
 # 리서치 스킬
@@ -70,23 +70,45 @@ allowed-tools: WebSearch, WebFetch, Read, Write, Bash, Glob
 
 ### 3. 정보 수집
 
-WebSearch로 최소 5개 이상의 서로 다른 출처를 확보한다.
+아래 검색 도구를 활용하여 최소 5개 이상의 서로 다른 출처를 확보한다.
 
+**검색 도구 우선순위:**
+1. `mcp__brave-search__brave_web_search` — 기본 웹 검색 도구. freshness 파라미터(`pd`, `pw`, `pm`)로 최신성 필터링이 가능하다.
+2. `mcp__brave-search__brave_news_search` — 뉴스/트렌드 조사 시 사용. 최신 기사 확보에 유리하다.
+3. `mcp__tavily__tavily-search` — AI 최적화 검색. 구조화된 요약과 함께 결과를 반환한다.
+4. `WebSearch` — 위 MCP 도구를 사용할 수 없을 때 폴백으로 사용한다.
+
+**Brave Search 활용 팁:**
+- 최신성이 중요한 주제는 `freshness: "pm"` (최근 1개월) 또는 `freshness: "pw"` (최근 1주)를 설정한다.
+- 한국어 검색은 `search_lang: "ko"`, `country: "KR"`을 설정한다.
+- 영어 검색과 한국어 검색을 병행하여 출처 다양성을 확보한다.
+- `count: 10` 이상으로 설정하여 충분한 후보를 확보한 뒤 신뢰도 높은 출처를 선별한다.
+
+**Tavily 활용 팁:**
+- `mcp__tavily__tavily-search`는 Brave Search와 병행하여 출처 다양성을 높이는 데 활용한다.
+- Brave로 검색한 뒤, 다른 관점의 결과가 필요할 때 Tavily로 추가 검색한다.
+
+**수집 기준:**
 - 최신성이 중요한 주제라면 핵심 근거 출처 중 가능한 한 최근 1개월 이내 자료를 포함한다.
 - 출처 수를 채우기 위해 신뢰도 낮은 자료를 무리하게 늘리지 않는다.
 - 신뢰할 만한 출처가 5개 미만이면, 그 사실과 이유를 보고서에 명시한다.
 
-WebSearch를 사용할 수 없으면 학습 데이터 기반으로 작성하되, 보고서 상단에 아래 문구를 넣는다.
+모든 검색 도구를 사용할 수 없으면 학습 데이터 기반으로 작성하되, 보고서 상단에 아래 문구를 넣는다.
 
 > 이 보고서는 실시간 웹 검색 없이 학습 데이터 기반으로 작성되었습니다. 최신 정보는 별도 확인이 필요합니다.
 
-### 4. URL 검증
+### 4. URL 검증 및 콘텐츠 추출
 
-최종 보고서에 실제로 인용할 URL만 WebFetch로 검증한다.
+최종 보고서에 실제로 인용할 URL의 콘텐츠를 확인한다.
 
+**추출 도구 우선순위:**
+1. `mcp__tavily__tavily-extract` — 최대 5개 URL을 한번에 배치 추출하여 클린 마크다운으로 반환한다. URL 검증과 콘텐츠 확보를 동시에 처리할 수 있어 가장 효율적이다.
+2. `WebFetch` — Tavily Extract를 사용할 수 없거나, 단일 URL만 확인할 때 사용한다.
+
+**추출 기준:**
 - 검색 결과에서 직접 얻은 URL만 사용한다.
 - URL을 추측하거나 조합하지 않는다.
-- WebFetch로 확인되지 않으면 `[URL 미확인]`으로 표기한다.
+- 추출에 실패하면 `[URL 미확인]`으로 표기한다.
 - 일시적 오류 가능성이 있으므로, 미확인 표기는 잘못된 URL과 동일한 의미로 단정하지 않는다.
 
 ### 5. 정보 정리 및 합성
